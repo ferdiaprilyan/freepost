@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FREE POSTING</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .notification {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .notification p {
+      margin: 0;
+    }
+
+    .comment-form {
+      margin-bottom: 20px;
+    }
+
+    .comment-form label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .comment-form input,
+    .comment-form textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .comment-form textarea {
+      width: 95%;
+    }
+
+    .comment-form button {
+      padding: 10px 20px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .comment-form a {
+      display: inline-block;
+      margin-left: 10px;
+      padding: 10px 20px;
+      background-color: #0088cc;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    .comment-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .comment-item {
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      position: relative;
+    }
+
+    .comment-item p {
+      margin: 0;
+    }
+
+    .comment-item .comment-details {
+      margin-bottom: 5px;
+    }
+
+    .comment-item .comment-date {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .delete-button {
+      color: #f44336;
+      cursor: pointer;
+    }
+
+    .delete-button:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        max-width: 100%;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>FREE POST</h1>
+
+    <div class="notification" id="notification">
+      <p id="notificationText"></p>
+    </div>
+
+    <div class="comment-form">
+      <label for="name">Nama:</label>
+      <input type="text" id="name" required>
+      <label for="comment">Komentar:</label>
+      <textarea id="comment" rows="4" required></textarea>
+      <button onclick="addComment()">Kirim</button>
+      <a href="https://t.me/akuniniterjual" target="_blank">Telegram</a>
+    </div>
+
+    <ul id="commentList" class="comment-list"></ul>
+
+    <script>
+      // Menampilkan Pesansaat halaman dimuat
+      window.addEventListener('load', function() {
+        var comments = getCommentsFromStorage();
+
+        comments.forEach(function(comment) {
+          appendComment(comment);
+        });
+      });
+
+      // Menambahkan komentar
+      function addComment() {
+        var nameInput = document.getElementById('name');
+        var commentInput = document.getElementById('comment');
+        var commentList = document.getElementById('commentList');
+        var notificationText = document.getElementById('notificationText');
+
+        // Mengecek apakah input nama dan Pesansudah diisi
+        if (nameInput.value === '' || commentInput.value === '') {
+          notificationText.textContent = 'Silakan isi nama dan Pesan terlebih dahulu.';
+          return;
+        }
+
+        // Membuat objek Pesanbaru
+        var comment = {
+          name: nameInput.value,
+          content: commentInput.value,
+          date: new Date().toLocaleString()
+        };
+
+        // Menambahkan Pesanke Local Storage
+        var comments = getCommentsFromStorage();
+        comments.unshift(comment);
+        saveCommentsToStorage(comments);
+
+        // Menambahkan Pesanke tampilan
+        appendComment(comment);
+
+        // Menampilkan notifikasi
+        notificationText.textContent = 'Pesan berhasil ditambahkan.';
+
+        // Mengosongkan input
+        nameInput.value = '';
+        commentInput.value = '';
+      }
+
+      // Menambahkan Pesanke tampilan
+      function appendComment(comment) {
+        var commentList = document.getElementById('commentList');
+
+        // Membuat elemen Pesanbaru
+        var commentItem = document.createElement('li');
+        commentItem.classList.add('comment-item');
+        var commentDetails = document.createElement('div');
+        commentDetails.classList.add('comment-details');
+        var commentName = document.createElement('p');
+        commentName.textContent = comment.name;
+        var commentContent = document.createElement('p');
+        commentContent.textContent = comment.content;
+        var commentDate = document.createElement('p');
+        commentDate.classList.add('comment-date');
+        commentDate.textContent = comment.date;
+
+        // Membuat tombol hapus
+        var deleteButton = document.createElement('span');
+        deleteButton.classList.add('delete-button');
+        deleteButton.textContent = 'Hapus';
+        deleteButton.setAttribute('data-comment', JSON.stringify(comment)); // Menyimpan data Pesandalam atribut
+
+        // Menambahkan event listener untuk tombol hapus
+        deleteButton.addEventListener('click', function(event) {
+          var comment = JSON.parse(event.target.getAttribute('data-comment')); // Mendapatkan data Pesandari atribut
+          removeComment(comment);
+        });
+
+        // Menggabungkan elemen-elemen komentar
+        commentDetails.appendChild(commentName);
+        commentDetails.appendChild(commentContent);
+        commentDetails.appendChild(commentDate);
+        commentItem.appendChild(commentDetails);
+        commentItem.appendChild(deleteButton);
+        commentList.prepend(commentItem);
+      }
+
+      // Menghapus komentar
+      function removeComment(comment) {
+        var confirmation = confirm('Apakah Anda yakin ingin menghapus Pesan ini?');
+
+        if (confirmation) {
+          var code = prompt('Masukkan kode untuk menghapus komentar:', '');
+
+          if (code === '2727') {
+            // Menghapus Pesandari Local Storage
+            var comments = getCommentsFromStorage();
+            comments = comments.filter(function(c) {
+              return c.date !== comment.date;
+            });
+            saveCommentsToStorage(comments);
+
+            // Menghapus Pesandari tampilan
+            var commentItem = document.querySelector('.comment-item');
+            commentItem.remove();
+
+            // Menampilkan notifikasi
+            var notificationText = document.getElementById('notificationText');
+            notificationText.textContent = 'Pesan berhasil dihapus.';
+          } else {
+            alert('Kode salah. Pesan gagal dihapus.');
+          }
+        }
+      }
+
+      // Mengambil Pesandari Local Storage
+      function getCommentsFromStorage() {
+        var commentsString = localStorage.getItem('comments');
+        return commentsString ? JSON.parse(commentsString) : [];
+      }
+
+      // Menyimpan Pesanke Local Storage
+      function saveCommentsToStorage(comments) {
+        localStorage.setItem('comments', JSON.stringify(comments));
+      }
+    </script>
+  </div>
+</body>
+</html>
